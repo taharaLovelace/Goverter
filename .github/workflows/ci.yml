@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check formatting
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Recurse -Filter '*.go' | ForEach-Object FullName
+          $unformatted = gofmt -l $files
+          if ($unformatted) {
+            Write-Error "The following files need gofmt:`n$($unformatted -join "`n")"
+          }
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Verify modules
+        run: go mod verify
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build
+        run: go build ./cmd/goverter

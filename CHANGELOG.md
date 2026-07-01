@@ -1,0 +1,20 @@
+# Changelog
+
+All notable changes to Goverter are documented in this file.
+
+## [1.0.0] - 2026-06-30
+
+### Added
+
+- Video conversion to MP4/H.264/AAC and WebM/VP9/Opus.
+- Audio conversion to MP3, WAV, FLAC, and OGG/Vorbis.
+- Image conversion to JPG, PNG, and WebP.
+- Audio extraction from video.
+- File and recursive directory conversion with safe output handling.
+- Compact, balanced, and quality presets for lossy formats.
+- Human-readable progress and structured JSON output.
+- Media inspection and supported-format commands.
+- Windows x64 installer containing pinned FFmpeg and ffprobe binaries.
+- Automated tests, installer validation, checksums, and GitHub Releases.
+
+[1.0.0]: https://github.com/taharaLovelace/Goverter/releases/tag/v1.0.0
