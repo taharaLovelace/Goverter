@@ -1,3 +1,9 @@
+## [Unreleased]
+
+## [1.1.0] - 2026-07-04
+
+### Added
+
 # Changelog
 
 All notable changes to Goverter are documented in this file.
@@ -31,3 +37,5 @@ All notable changes to Goverter are documented in this file.
 - Automated tests, installer validation, checksums, and GitHub Releases.
 
 [1.0.0]: https://github.com/taharaLovelace/Goverter/releases/tag/v1.0.0
+
+[1.1.0]: https://github.com/taharaLovelace/Goverter/compare/v1.0.0...v1.1.0
