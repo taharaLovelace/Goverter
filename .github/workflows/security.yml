@@ -1,0 +1,71 @@
+name: Security
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sast:
+    name: SAST
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install pinned security tools
+        shell: pwsh
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.25.0
+          go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
+
+      - name: Run security scan
+        id: security_scan
+        continue-on-error: true
+        shell: pwsh
+        run: ./scripts/run-security.ps1 -Mode report -OutputDirectory .artifacts/security
+
+      - name: Upload SARIF to code scanning
+        if: >-
+          always() &&
+          hashFiles('.artifacts/security/gosec.sarif') != '' &&
+          (github.event_name != 'pull_request' ||
+           github.event.pull_request.head.repo.full_name == github.repository)
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: .artifacts/security/gosec.sarif
+          category: gosec
+
+      - name: Upload security report
+        if: always() && hashFiles('.artifacts/security/gosec.sarif') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report-${{ github.run_id }}
+          path: .artifacts/security/gosec.sarif
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Enforce blocking checks
+        if: always() && steps.security_scan.outcome == 'failure'
+        shell: pwsh
+        run: throw 'Security scan failed. In report mode, govulncheck and scanner errors are blocking.'

@@ -1,6 +1,6 @@
 //go:build windows
 
-package convert
+package pdf
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func replaceFile(source, destination string, overwrite bool) error {
+func replaceOutput(source, destination string, overwrite bool) error {
 	sourcePointer, err := windows.UTF16PtrFromString(source)
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func replaceFile(source, destination string, overwrite bool) error {
 		flags |= windows.MOVEFILE_REPLACE_EXISTING
 	}
 	if err := windows.MoveFileEx(sourcePointer, destinationPointer, flags); err != nil {
-		return fmt.Errorf("move completed output: %w", err)
+		return fmt.Errorf("move completed PDF: %w", err)
 	}
 	return nil
 }

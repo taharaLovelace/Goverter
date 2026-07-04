@@ -13,38 +13,48 @@ $outputPath = [System.IO.Path]::GetFullPath($OutputDirectory)
 $licenseRoot = Join-Path $outputPath 'third_party\go'
 New-Item -ItemType Directory -Force -Path $licenseRoot | Out-Null
 
-$licenses = @(
-    @{
-        Module = 'github.com/spf13/cobra@v1.10.2'
-        Source = 'LICENSE.txt'
-        Name = 'cobra'
-    },
-    @{
-        Module = 'github.com/spf13/pflag@v1.0.9'
-        Source = 'LICENSE'
-        Name = 'pflag'
-    },
-    @{
-        Module = 'github.com/inconshreveable/mousetrap@v1.1.0'
-        Source = 'LICENSE'
-        Name = 'mousetrap'
-    }
+$moduleLines = @(
+    go list -deps -f '{{with .Module}}{{if not .Main}}{{.Path}}|{{.Version}}|{{.Dir}}{{end}}{{end}}' `
+        ./cmd/goverter |
+        Where-Object { $_ } |
+        Sort-Object -Unique
+)
+if ($LASTEXITCODE -ne 0) {
+    throw 'Could not enumerate Go dependencies used by Goverter.'
+}
+
+$manifest = @(
+    'Go modules included in Goverter',
+    'Generated from the dependencies compiled into ./cmd/goverter.',
+    ''
 )
 
-foreach ($license in $licenses) {
-    $moduleInfo = go mod download -json $license.Module | ConvertFrom-Json
-    if ($LASTEXITCODE -ne 0 -or -not $moduleInfo.Dir) {
-        throw "Could not locate Go module $($license.Module)."
+foreach ($line in $moduleLines) {
+    $parts = $line -split '\|', 3
+    if ($parts.Count -ne 3) {
+        throw "Unexpected Go module information: $line"
     }
 
-    $source = Join-Path $moduleInfo.Dir $license.Source
-    if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
-        throw "License file not found for $($license.Module): $source"
+    $modulePath, $version, $moduleDirectory = $parts
+    $licenseFiles = @(
+        Get-ChildItem -LiteralPath $moduleDirectory -File |
+            Where-Object { $_.Name -match '^(LICENSE|COPYING|NOTICE)(\..*)?$' } |
+            Sort-Object Name
+    )
+    if ($licenseFiles.Count -eq 0) {
+        throw "No license or notice file found for $modulePath@$version."
     }
 
-    $destination = Join-Path $licenseRoot $license.Name
+    $directoryName = (($modulePath + '@' + $version) -replace '[^A-Za-z0-9._@-]', '_')
+    $destination = Join-Path $licenseRoot $directoryName
     New-Item -ItemType Directory -Force -Path $destination | Out-Null
-    Copy-Item -LiteralPath $source -Destination (Join-Path $destination 'LICENSE') -Force
+    foreach ($licenseFile in $licenseFiles) {
+        Copy-Item -LiteralPath $licenseFile.FullName -Destination $destination -Force
+    }
+    $manifest += "$modulePath $version -> $directoryName"
 }
+
+$manifest | Set-Content -LiteralPath (Join-Path $licenseRoot 'THIRD_PARTY_MODULES.txt') `
+    -Encoding UTF8
 
 Write-Host "Go dependency licenses staged in $licenseRoot"

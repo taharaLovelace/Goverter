@@ -49,9 +49,10 @@ try {
         (Join-Path $installPath 'tools\ffmpeg.exe'),
         (Join-Path $installPath 'tools\ffprobe.exe'),
         (Join-Path $installPath 'licenses\ffmpeg\LICENSE'),
-        (Join-Path $installPath 'licenses\cobra\LICENSE'),
-        (Join-Path $installPath 'licenses\pflag\LICENSE'),
-        (Join-Path $installPath 'licenses\mousetrap\LICENSE')
+        (Join-Path $installPath 'licenses\go\THIRD_PARTY_MODULES.txt'),
+        (Join-Path $installPath 'licenses\go\github.com_pdfcpu_pdfcpu@v0.13.0\LICENSE.txt'),
+        (Join-Path $installPath 'licenses\go\github.com_spf13_cobra@v1.10.2\LICENSE.txt'),
+        (Join-Path $installPath 'licenses\go\golang.org_x_sys@v0.46.0\LICENSE')
     )) {
         if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
             throw "Installer did not create expected file: $file"

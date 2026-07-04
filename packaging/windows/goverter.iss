@@ -45,9 +45,7 @@ Source: "{#SourceDir}\tools\ffprobe.exe"; DestDir: "{app}\tools"; Flags: ignorev
 Source: "{#SourceDir}\third_party\ffmpeg\LICENSE"; DestDir: "{app}\licenses\ffmpeg"; Flags: ignoreversion
 Source: "{#SourceDir}\third_party\ffmpeg\README.txt"; DestDir: "{app}\licenses\ffmpeg"; Flags: ignoreversion
 Source: "{#SourceDir}\third_party\ffmpeg\tools.lock.json"; DestDir: "{app}\licenses\ffmpeg"; Flags: ignoreversion
-Source: "{#SourceDir}\third_party\go\cobra\LICENSE"; DestDir: "{app}\licenses\cobra"; Flags: ignoreversion
-Source: "{#SourceDir}\third_party\go\pflag\LICENSE"; DestDir: "{app}\licenses\pflag"; Flags: ignoreversion
-Source: "{#SourceDir}\third_party\go\mousetrap\LICENSE"; DestDir: "{app}\licenses\mousetrap"; Flags: ignoreversion
+Source: "{#SourceDir}\third_party\go\*"; DestDir: "{app}\licenses\go"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\..\LICENSE"; DestDir: "{app}\licenses\goverter"; Flags: ignoreversion
 Source: "..\..\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\README.md"; DestDir: "{app}"; Flags: ignoreversion
