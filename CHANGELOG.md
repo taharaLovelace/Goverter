@@ -2,6 +2,15 @@
 
 All notable changes to Goverter are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- `goverter pdf images` command for combining JPG, PNG, TIFF, and WebP files.
+- A4, Letter, source-sized pages, portrait/landscape orientation, and margins.
+- Natural directory ordering, recursive discovery, JSON results, and safe
+  atomic output publishing for generated PDFs.
+
 ## [1.0.0] - 2026-06-30
 
 ### Added

@@ -22,6 +22,14 @@ FFmpeg is a trademark of Fabrice Bellard, the originator of the FFmpeg
 project. Goverter is not affiliated with or endorsed by the FFmpeg project or
 the binary provider.
 
+## pdfcpu
+
+Goverter uses pdfcpu 0.13.0 to create and validate PDF documents. pdfcpu is
+licensed under the Apache License 2.0.
+
+- Project: https://github.com/pdfcpu/pdfcpu
+- License: https://github.com/pdfcpu/pdfcpu/blob/v0.13.0/LICENSE.txt
+
 ## Cobra
 
 Goverter uses Cobra, Copyright (c) 2013-2023 Steve Francia, under the Apache
@@ -43,7 +51,8 @@ Goverter uses mousetrap under the Apache License 2.0.
 
 - Project: https://github.com/inconshreveable/mousetrap
 
-The complete license texts for these dependencies are included in the
-Windows installation under the `licenses` directory.
+The complete license and notice files for all Go modules compiled into
+Goverter are included in the Windows installation under `licenses\go`, along
+with a module manifest.
 
 This notice is informational and is not legal advice.

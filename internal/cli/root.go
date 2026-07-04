@@ -26,7 +26,7 @@ func Execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 		return 0
 	}
 	if errors.Is(err, context.Canceled) || errors.Is(ctx.Err(), context.Canceled) {
-		fmt.Fprintln(stderr, "Conversion canceled.")
+		fmt.Fprintln(stderr, "Operation canceled.")
 		return 130
 	}
 	var coded *exitError
@@ -41,7 +41,7 @@ func Execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 func newRootCommand(deps dependencies) *cobra.Command {
 	root := &cobra.Command{
 		Use:           "goverter",
-		Short:         "Convert video, audio, and image files with FFmpeg",
+		Short:         "Convert media files and create PDFs",
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Version:       buildinfo.Version,
@@ -56,6 +56,7 @@ func newRootCommand(deps dependencies) *cobra.Command {
 		newConvertCommand(deps),
 		newInfoCommand(deps),
 		newFormatsCommand(),
+		newPDFCommand(),
 	)
 	root.InitDefaultCompletionCmd()
 	return root
