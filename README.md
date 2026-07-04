@@ -1,7 +1,7 @@
 # Goverter
 
 Goverter is a small, script-friendly CLI for converting video, audio, and
-image files with FFmpeg and combining images into PDF documents. It offers
+image files with FFmpeg and creating or merging PDF documents. It offers
 safe defaults and focused commands instead of exposing every underlying
 option.
 
@@ -12,6 +12,7 @@ option.
 - Extract audio from video.
 - Inspect media metadata with `ffprobe`.
 - Combine JPG, PNG, TIFF, and WebP images into one PDF.
+- Merge two or more PDF files in an explicit order.
 - Human-readable progress and stable JSON results.
 - Never overwrite an existing output unless `--overwrite` is supplied.
 - Write to a temporary file and publish the final output only after FFmpeg
@@ -58,6 +59,7 @@ goverter formats
 goverter pdf images cover.jpg page2.png --output album.pdf
 goverter pdf images .\scans --output scans.pdf --page-size a4 --margin small
 goverter pdf images .\photos --output photos.pdf --page-size fit --recursive
+goverter pdf merge cover.pdf content.pdf appendix.pdf --output book.pdf
 goverter completion powershell
 ```
 
@@ -72,8 +74,12 @@ each PDF page match its source image. Fixed page sizes also support portrait
 or landscape orientation and margins of `none`, `small` (10 mm), or `large`
 (20 mm). Existing PDFs are protected unless `--overwrite` is supplied.
 
+The `pdf merge` command requires at least two PDF files and preserves the
+order in which they are provided. Its output name may omit the `.pdf`
+extension. Existing output is protected unless `--overwrite` is supplied.
+
 Progress and diagnostics are written to `stderr`; results are written to
-`stdout`. `convert`, `info`, `formats`, and `pdf images` support
+`stdout`. `convert`, `info`, `formats`, `pdf images`, and `pdf merge` support
 machine-readable JSON.
 
 Exit codes are:
@@ -108,6 +114,21 @@ To run real FFmpeg integration tests after staging:
 $env:GOVERTER_FFMPEG_DIR = "$PWD\dist\tools"
 go test -tags integration ./integration
 ```
+
+### Security checks
+
+Install the pinned scanners and run the same report used by GitHub Actions:
+
+```powershell
+go install github.com/securego/gosec/v2/cmd/gosec@v2.25.0
+go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
+.\scripts\run-security.ps1 -Mode report
+```
+
+Report mode always blocks reachable vulnerabilities reported by
+`govulncheck`, while `gosec` findings are published without failing the
+command during the initial adoption period. `-Mode enforce` makes medium or
+higher severity and confidence findings from `gosec` blocking as well.
 
 ## Licenses
 

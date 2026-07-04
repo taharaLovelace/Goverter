@@ -56,6 +56,55 @@ func TestRealImagesToPDF(t *testing.T) {
 	}
 }
 
+func TestRealPDFMergePreservesExplicitOrder(t *testing.T) {
+	directory := t.TempDir()
+	landscapeImage := filepath.Join(directory, "landscape.png")
+	portraitImage := filepath.Join(directory, "portrait.jpg")
+	writePNG(t, landscapeImage, 120, 80)
+	writeJPEG(t, portraitImage, 80, 120)
+
+	imageService := pdfservice.Service{Engine: pdfservice.PDFCPUEngine{}}
+	first := filepath.Join(directory, "first résumé.pdf")
+	if _, err := imageService.Create(context.Background(), []string{landscapeImage}, pdfservice.Options{
+		Output: first, PageSize: "a4", Orientation: "landscape", Margin: "none",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	second := filepath.Join(directory, "second document.pdf")
+	if _, err := imageService.Create(context.Background(), []string{portraitImage}, pdfservice.Options{
+		Output: second, PageSize: "letter", Orientation: "portrait", Margin: "small",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	output := filepath.Join(directory, "merged output.pdf")
+	summary, err := (pdfservice.MergeService{Engine: pdfservice.PDFCPUEngine{}}).Merge(
+		context.Background(),
+		[]string{first, second},
+		pdfservice.MergeOptions{Output: output},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if summary.PageCount != 2 {
+		t.Fatalf("page count = %d, want 2", summary.PageCount)
+	}
+
+	dimensions, err := pdfcpuapi.PageDimsFile(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(dimensions) != 2 {
+		t.Fatalf("unexpected page dimensions: %#v", dimensions)
+	}
+	if !dimensions[0].Landscape() {
+		t.Fatalf("first page is not landscape: %#v", dimensions[0])
+	}
+	if dimensions[1].Landscape() {
+		t.Fatalf("second page is not portrait: %#v", dimensions[1])
+	}
+}
+
 func writePNG(t *testing.T, path string, width, height int) {
 	t.Helper()
 	file, err := os.Create(path)

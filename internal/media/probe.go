@@ -15,7 +15,7 @@ type FFprobe struct {
 }
 
 func (p FFprobe) Probe(ctx context.Context, path string) (Info, error) {
-	command := exec.CommandContext(
+	command := exec.CommandContext( // #nosec G204 -- Goverter resolves ffprobe and passes arguments directly without a shell.
 		ctx,
 		p.Path,
 		"-v", "error",

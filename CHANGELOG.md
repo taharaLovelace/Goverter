@@ -10,6 +10,10 @@ All notable changes to Goverter are documented in this file.
 - A4, Letter, source-sized pages, portrait/landscape orientation, and margins.
 - Natural directory ordering, recursive discovery, JSON results, and safe
   atomic output publishing for generated PDFs.
+- `goverter pdf merge` command with explicit input ordering, JSON results,
+  overwrite protection, and atomic output publishing.
+- Gradual SAST workflow with gosec SARIF reports and blocking govulncheck
+  scans.
 
 ## [1.0.0] - 2026-06-30
 

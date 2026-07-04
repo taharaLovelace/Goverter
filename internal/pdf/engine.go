@@ -2,7 +2,6 @@ package pdf
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	pdfcpuapi "github.com/pdfcpu/pdfcpu/pkg/api"
@@ -18,8 +17,7 @@ type PDFCPUEngine struct{}
 var disablePDFCPUConfig sync.Once
 
 func (PDFCPUEngine) Create(images []string, output string, layout Layout) (int, error) {
-	disablePDFCPUConfig.Do(pdfcpuapi.DisableConfigDir)
-	config := model.NewDefaultConfiguration()
+	config := pdfcpuConfiguration()
 
 	configuration, err := layout.ImportConfiguration()
 	if err != nil {
@@ -31,12 +29,29 @@ func (PDFCPUEngine) Create(images []string, output string, layout Layout) (int, 
 	if err := pdfcpuapi.ValidateFile(output, config); err != nil {
 		return 0, fmt.Errorf("validate generated PDF: %w", err)
 	}
-	file, err := os.Open(output)
-	if err != nil {
-		return 0, fmt.Errorf("open generated PDF: %w", err)
+	return pageCount(output)
+}
+
+func (PDFCPUEngine) Merge(files []string, output string) (int, error) {
+	config := pdfcpuConfiguration()
+	config.CreateBookmarks = false
+
+	if err := pdfcpuapi.MergeCreateFile(files, output, false, config); err != nil {
+		return 0, fmt.Errorf("merge PDFs: %w", err)
 	}
-	defer file.Close()
-	pageCount, err := pdfcpuapi.PageCount(file, config)
+	if err := pdfcpuapi.ValidateFile(output, config); err != nil {
+		return 0, fmt.Errorf("validate merged PDF: %w", err)
+	}
+	return pageCount(output)
+}
+
+func pdfcpuConfiguration() *model.Configuration {
+	disablePDFCPUConfig.Do(pdfcpuapi.DisableConfigDir)
+	return model.NewDefaultConfiguration()
+}
+
+func pageCount(output string) (int, error) {
+	pageCount, err := pdfcpuapi.PageCountFile(output)
 	if err != nil {
 		return 0, fmt.Errorf("count generated PDF pages: %w", err)
 	}

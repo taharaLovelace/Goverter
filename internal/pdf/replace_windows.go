@@ -4,34 +4,25 @@ package pdf
 
 import (
 	"fmt"
-	"syscall"
-	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
-const moveFileReplaceExisting = 0x1
-
-var moveFileEx = syscall.NewLazyDLL("kernel32.dll").NewProc("MoveFileExW")
-
 func replaceOutput(source, destination string, overwrite bool) error {
-	sourcePointer, err := syscall.UTF16PtrFromString(source)
+	sourcePointer, err := windows.UTF16PtrFromString(source)
 	if err != nil {
 		return err
 	}
-	destinationPointer, err := syscall.UTF16PtrFromString(destination)
+	destinationPointer, err := windows.UTF16PtrFromString(destination)
 	if err != nil {
 		return err
 	}
-	flags := uintptr(0)
+	flags := uint32(0)
 	if overwrite {
-		flags |= moveFileReplaceExisting
+		flags |= windows.MOVEFILE_REPLACE_EXISTING
 	}
-	result, _, callErr := moveFileEx.Call(
-		uintptr(unsafe.Pointer(sourcePointer)),
-		uintptr(unsafe.Pointer(destinationPointer)),
-		flags,
-	)
-	if result == 0 {
-		return fmt.Errorf("move completed PDF: %w", callErr)
+	if err := windows.MoveFileEx(sourcePointer, destinationPointer, flags); err != nil {
+		return fmt.Errorf("move completed PDF: %w", err)
 	}
 	return nil
 }

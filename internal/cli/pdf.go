@@ -15,7 +15,10 @@ func newPDFCommand() *cobra.Command {
 		Use:   "pdf",
 		Short: "Create and process PDF files",
 	}
-	command.AddCommand(newPDFImagesCommand())
+	command.AddCommand(
+		newPDFImagesCommand(),
+		newPDFMergeCommand(),
+	)
 	return command
 }
 

@@ -2,6 +2,7 @@ package pdf
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -35,7 +36,7 @@ func (s Service) Create(ctx context.Context, inputs []string, options Options) (
 			return Summary{}, err
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(output), 0o750); err != nil {
 		return Summary{}, fmt.Errorf("create output directory: %w", err)
 	}
 
@@ -92,8 +93,7 @@ func temporaryOutputPath(output string) (string, error) {
 	}
 	name := file.Name()
 	if err := file.Close(); err != nil {
-		os.Remove(name)
-		return "", err
+		return "", errors.Join(err, os.Remove(name))
 	}
 	if err := os.Remove(name); err != nil {
 		return "", err

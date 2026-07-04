@@ -1,4 +1,5 @@
 /.cache/
+/.artifacts/
 /dist/
 /coverage.out
 *.test

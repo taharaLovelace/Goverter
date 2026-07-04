@@ -19,7 +19,7 @@ type FFmpegRunner struct {
 }
 
 func (r FFmpegRunner) Run(ctx context.Context, plan Plan, progress func(float64, bool)) error {
-	command := exec.CommandContext(ctx, r.Path, plan.Args...)
+	command := exec.CommandContext(ctx, r.Path, plan.Args...) // #nosec G204 -- Goverter resolves FFmpeg and passes arguments directly without a shell.
 	stdout, err := command.StdoutPipe()
 	if err != nil {
 		return fmt.Errorf("read ffmpeg progress: %w", err)

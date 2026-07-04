@@ -220,7 +220,7 @@ func (s Service) runOne(
 			return result
 		}
 	}
-	if err := os.MkdirAll(filepath.Dir(output), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(output), 0o750); err != nil {
 		result.Error = fmt.Sprintf("create output directory: %v", err)
 		return result
 	}
@@ -342,8 +342,7 @@ func temporaryPath(output string) (string, error) {
 	}
 	name := file.Name()
 	if closeErr := file.Close(); closeErr != nil {
-		os.Remove(name)
-		return "", closeErr
+		return "", errors.Join(closeErr, os.Remove(name))
 	}
 	return name, nil
 }
