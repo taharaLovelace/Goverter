@@ -1,14 +1,10 @@
-## [Unreleased]
-
-## [1.1.0] - 2026-07-04
-
-### Added
-
 # Changelog
 
 All notable changes to Goverter are documented in this file.
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-07-04
 
 ### Added
 
