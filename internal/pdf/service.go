@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/taharaLovelace/Goverter/internal/publish"
 )
 
 type Service struct {
@@ -53,7 +55,7 @@ func (s Service) Create(ctx context.Context, inputs []string, options Options) (
 	if err := ctx.Err(); err != nil {
 		return Summary{}, err
 	}
-	if err := replaceOutput(temporary, output, options.Overwrite); err != nil {
+	if err := publish.Replace(temporary, output, options.Overwrite); err != nil {
 		return Summary{}, err
 	}
 

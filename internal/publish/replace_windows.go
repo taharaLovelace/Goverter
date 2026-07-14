@@ -1,6 +1,6 @@
 //go:build windows
 
-package convert
+package publish
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func replaceFile(source, destination string, overwrite bool) error {
+func Replace(source, destination string, overwrite bool) error {
 	sourcePointer, err := windows.UTF16PtrFromString(source)
 	if err != nil {
 		return err
@@ -19,7 +19,7 @@ func replaceFile(source, destination string, overwrite bool) error {
 	}
 	flags := uint32(0)
 	if overwrite {
-		flags |= windows.MOVEFILE_REPLACE_EXISTING
+		flags = windows.MOVEFILE_REPLACE_EXISTING
 	}
 	if err := windows.MoveFileEx(sourcePointer, destinationPointer, flags); err != nil {
 		return fmt.Errorf("move completed output: %w", err)

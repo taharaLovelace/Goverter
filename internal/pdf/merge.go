@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/taharaLovelace/Goverter/internal/publish"
 )
 
 type MergeEngine interface {
@@ -72,7 +74,7 @@ func (s MergeService) Merge(
 	if err := ctx.Err(); err != nil {
 		return MergeSummary{}, err
 	}
-	if err := replaceOutput(temporary, output, options.Overwrite); err != nil {
+	if err := publish.Replace(temporary, output, options.Overwrite); err != nil {
 		return MergeSummary{}, err
 	}
 

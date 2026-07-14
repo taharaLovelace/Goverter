@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/taharaLovelace/Goverter/internal/media"
+	"github.com/taharaLovelace/Goverter/internal/publish"
 )
 
 type Options struct {
@@ -252,7 +253,7 @@ func (s Service) runOne(
 		result.Error = err.Error()
 		return result
 	}
-	if err := replaceFile(temporary, output, overwrite); err != nil {
+	if err := publish.Replace(temporary, output, overwrite); err != nil {
 		result.Error = err.Error()
 		return result
 	}

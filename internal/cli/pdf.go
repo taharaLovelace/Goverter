@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -71,9 +70,7 @@ func newPDFImagesCommand() *cobra.Command {
 			}
 
 			if asJSON {
-				encoder := json.NewEncoder(command.OutOrStdout())
-				encoder.SetIndent("", "  ")
-				if err := encoder.Encode(summary); err != nil {
+				if err := writeJSON(command.OutOrStdout(), summary); err != nil {
 					return runtimeError(err)
 				}
 				return nil
