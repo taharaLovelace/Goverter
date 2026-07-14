@@ -1,16 +1,16 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 	"github.com/taharaLovelace/Goverter/internal/media"
+	"github.com/taharaLovelace/Goverter/internal/toolchain"
 )
 
-func newInfoCommand(deps dependencies) *cobra.Command {
+func newInfoCommand(resolver toolchain.Resolver) *cobra.Command {
 	var asJSON bool
 	command := &cobra.Command{
 		Use:   "info <file>",
@@ -33,7 +33,7 @@ func newInfoCommand(deps dependencies) *cobra.Command {
 			if !stat.Mode().IsRegular() {
 				return usageError("info input must be a regular file")
 			}
-			probePath, err := deps.resolver.FFprobe()
+			probePath, err := resolver.FFprobe()
 			if err != nil {
 				return runtimeError(err)
 			}
@@ -42,9 +42,7 @@ func newInfoCommand(deps dependencies) *cobra.Command {
 				return runtimeError(err)
 			}
 			if asJSON {
-				encoder := json.NewEncoder(command.OutOrStdout())
-				encoder.SetIndent("", "  ")
-				if err := encoder.Encode(info); err != nil {
+				if err := writeJSON(command.OutOrStdout(), info); err != nil {
 					return runtimeError(err)
 				}
 				return nil

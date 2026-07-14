@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -11,9 +10,10 @@ import (
 	"github.com/spf13/cobra"
 	converter "github.com/taharaLovelace/Goverter/internal/convert"
 	"github.com/taharaLovelace/Goverter/internal/media"
+	"github.com/taharaLovelace/Goverter/internal/toolchain"
 )
 
-func newConvertCommand(deps dependencies) *cobra.Command {
+func newConvertCommand(resolver toolchain.Resolver) *cobra.Command {
 	var (
 		target     string
 		output     string
@@ -47,11 +47,11 @@ func newConvertCommand(deps dependencies) *cobra.Command {
 				return usageError("--preset does not apply to lossless %s output", format.Name)
 			}
 
-			ffprobePath, err := deps.resolver.FFprobe()
+			ffprobePath, err := resolver.FFprobe()
 			if err != nil {
 				return runtimeError(err)
 			}
-			ffmpegPath, err := deps.resolver.FFmpeg()
+			ffmpegPath, err := resolver.FFmpeg()
 			if err != nil {
 				return runtimeError(err)
 			}
@@ -79,9 +79,7 @@ func newConvertCommand(deps dependencies) *cobra.Command {
 			}
 
 			if asJSON {
-				encoder := json.NewEncoder(command.OutOrStdout())
-				encoder.SetIndent("", "  ")
-				if err := encoder.Encode(summary); err != nil {
+				if err := writeJSON(command.OutOrStdout(), summary); err != nil {
 					return runtimeError(err)
 				}
 			} else {

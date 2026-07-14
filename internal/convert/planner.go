@@ -7,7 +7,6 @@ import (
 )
 
 type Plan struct {
-	Input    string
 	Output   string
 	Duration float64
 	Args     []string
@@ -49,7 +48,6 @@ func BuildPlan(input media.Info, output string, format Format, preset Preset) (P
 	args = append(args, "-f", format.Muxer, "-y", output)
 
 	return Plan{
-		Input:    input.Path,
 		Output:   output,
 		Duration: input.DurationSeconds,
 		Args:     args,

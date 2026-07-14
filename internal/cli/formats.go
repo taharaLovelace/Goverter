@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -26,9 +25,7 @@ func newFormatsCommand() *cobra.Command {
 				Formats: converter.ListFormats(),
 			}
 			if asJSON {
-				encoder := json.NewEncoder(command.OutOrStdout())
-				encoder.SetIndent("", "  ")
-				return encoder.Encode(output)
+				return writeJSON(command.OutOrStdout(), output)
 			}
 
 			out := command.OutOrStdout()

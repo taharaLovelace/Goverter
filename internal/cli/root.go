@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -11,12 +12,8 @@ import (
 	"github.com/taharaLovelace/Goverter/internal/toolchain"
 )
 
-type dependencies struct {
-	resolver toolchain.Resolver
-}
-
 func Execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
-	root := newRootCommand(dependencies{resolver: toolchain.NewResolver()})
+	root := newRootCommand(toolchain.NewResolver())
 	root.SetArgs(args)
 	root.SetOut(stdout)
 	root.SetErr(stderr)
@@ -38,7 +35,7 @@ func Execute(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	return 2
 }
 
-func newRootCommand(deps dependencies) *cobra.Command {
+func newRootCommand(resolver toolchain.Resolver) *cobra.Command {
 	root := &cobra.Command{
 		Use:           "goverter",
 		Short:         "Convert media files and create PDFs",
@@ -53,11 +50,17 @@ func newRootCommand(deps dependencies) *cobra.Command {
 		buildinfo.Date,
 	))
 	root.AddCommand(
-		newConvertCommand(deps),
-		newInfoCommand(deps),
+		newConvertCommand(resolver),
+		newInfoCommand(resolver),
 		newFormatsCommand(),
 		newPDFCommand(),
 	)
 	root.InitDefaultCompletionCmd()
 	return root
+}
+
+func writeJSON(writer io.Writer, value any) error {
+	encoder := json.NewEncoder(writer)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(value)
 }

@@ -26,11 +26,9 @@ type Stream struct {
 	Channels   int    `json:"channels,omitempty"`
 	BitRate    string `json:"bit_rate,omitempty"`
 	Duration   string `json:"duration,omitempty"`
-	NBFrames   string `json:"nb_frames,omitempty"`
 }
 
 type Format struct {
-	Filename   string            `json:"filename"`
 	FormatName string            `json:"format_name"`
 	Duration   string            `json:"duration"`
 	Size       string            `json:"size"`
