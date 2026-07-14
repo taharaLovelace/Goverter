@@ -4,6 +4,12 @@ All notable changes to Goverter are documented in this file.
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-07-13
+
+### Fixed
+
+- Updated the Go toolchain to 1.26.5 to address GO-2026-5856.
+
 ## [1.1.1] - 2026-07-13
 
 ### Fixed
@@ -48,3 +54,5 @@ All notable changes to Goverter are documented in this file.
 [1.1.0]: https://github.com/taharaLovelace/Goverter/compare/v1.0.0...v1.1.0
 
 [1.1.1]: https://github.com/taharaLovelace/Goverter/compare/v1.1.0...v1.1.1
+
+[1.1.2]: https://github.com/taharaLovelace/Goverter/compare/v1.1.1...v1.1.2
