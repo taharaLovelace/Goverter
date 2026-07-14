@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://go.dev/images/gophers/blue.svg" alt="Go Gopher" width="180">
+</p>
+
 # Goverter
 
 Goverter is a small, script-friendly CLI for converting video, audio, and

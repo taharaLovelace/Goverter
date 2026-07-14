@@ -1,5 +1,14 @@
 # Third-party notices
 
+## Go Gopher
+
+The Go Gopher artwork displayed in the README was designed by Renée French
+and is licensed under the Creative Commons Attribution 4.0 license.
+
+- Artwork: https://go.dev/images/gophers/blue.svg
+- Creator: https://reneefrench.blogspot.com/
+- License: https://creativecommons.org/licenses/by/4.0/
+
 ## FFmpeg
 
 Goverter invokes the separate `ffmpeg` and `ffprobe` command-line programs.
