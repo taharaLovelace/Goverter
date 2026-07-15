@@ -14,6 +14,7 @@ and is licensed under the Creative Commons Attribution 4.0 license.
 Goverter invokes the separate `ffmpeg` and `ffprobe` command-line programs.
 The Windows installer redistributes the Gyan "release essentials" build of
 FFmpeg described in `tools.lock.json`.
+The Linux archive does not redistribute FFmpeg; it uses the system installation.
 
 That build is licensed under GNU GPL version 3 and includes optional external
 libraries with their own notices. The installer includes the unmodified

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
@@ -333,7 +334,8 @@ func collectFiles(root, outputRoot string, recursive bool) ([]string, error) {
 }
 
 func samePath(first, second string) bool {
-	return strings.EqualFold(filepath.Clean(first), filepath.Clean(second))
+	first, second = filepath.Clean(first), filepath.Clean(second)
+	return first == second || runtime.GOOS == "windows" && strings.EqualFold(first, second)
 }
 
 func temporaryPath(output string) (string, error) {

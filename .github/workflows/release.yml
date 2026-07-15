@@ -8,35 +8,27 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
-
       - name: Validate release tag
         shell: pwsh
         run: |
           if ('${{ github.ref_name }}' -notmatch '^v\d+\.\d+\.\d+$') {
             throw 'Release tags must use the form vMAJOR.MINOR.PATCH.'
           }
-
-      - name: Verify modules
-        run: go mod verify
-
-      - name: Install pinned vulnerability scanner
-        run: go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
-
-      - name: Check reachable vulnerabilities
-        run: govulncheck ./...
-
-      - name: Test
-        run: go test ./...
-
+      - name: Verify, scan, and test
+        shell: pwsh
+        run: |
+          go mod verify
+          go install golang.org/x/vuln/cmd/govulncheck@v1.5.0
+          govulncheck ./...
+          go test ./...
       - name: Build Goverter
         shell: pwsh
         run: |
@@ -49,52 +41,84 @@ jobs:
             "-X github.com/taharaLovelace/Goverter/internal/buildinfo.Commit=$commit " +
             "-X github.com/taharaLovelace/Goverter/internal/buildinfo.Date=$date"
           go build -trimpath -ldflags $ldflags -o dist/goverter.exe ./cmd/goverter
-
-      - name: Stage pinned FFmpeg
-        shell: pwsh
-        run: ./scripts/prepare-ffmpeg.ps1
-
-      - name: Stage Go dependency licenses
-        shell: pwsh
-        run: ./scripts/prepare-go-licenses.ps1
-
-      - name: Run FFmpeg integration tests
+      - name: Stage release dependencies
         shell: pwsh
         run: |
+          ./scripts/prepare-ffmpeg.ps1
+          ./scripts/prepare-go-licenses.ps1
           $env:GOVERTER_FFMPEG_DIR = Join-Path $PWD 'dist/tools'
           go test -tags integration ./integration
-
-      - name: Install Inno Setup
-        run: choco install innosetup --no-progress -y
-
-      - name: Build installer
+      - name: Build and test installer
         shell: pwsh
         run: |
+          choco install innosetup --no-progress -y
           $version = '${{ github.ref_name }}'.TrimStart('v')
           iscc "/DMyAppVersion=$version" packaging/windows/goverter.iss
-
-      - name: Test installer round trip
-        shell: pwsh
-        run: |
           $installer = Get-ChildItem dist/installer/Goverter-*-windows-x64.exe -File
           ./scripts/test-installer.ps1 -InstallerPath $installer.FullName
-
-      - name: Create checksums
-        shell: pwsh
-        run: |
-          $installer = Get-ChildItem dist/installer/Goverter-*-windows-x64.exe -File
           $hash = (Get-FileHash -LiteralPath $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash *$($installer.Name)" | Set-Content -NoNewline -Encoding ascii "$($installer.FullName).sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: |
+            dist/installer/Goverter-*-windows-x64.exe
+            dist/installer/Goverter-*-windows-x64.exe.sha256
 
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Verify and test
+        run: |
+          go mod verify
+          go test ./...
+          go test -tags integration ./integration
+      - name: Build and package Goverter
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          ldflags="-s -w -X github.com/taharaLovelace/Goverter/internal/buildinfo.Version=$version -X github.com/taharaLovelace/Goverter/internal/buildinfo.Commit=$GITHUB_SHA -X github.com/taharaLovelace/Goverter/internal/buildinfo.Date=$date"
+          mkdir -p dist/linux
+          go build -trimpath -ldflags "$ldflags" -o dist/linux/goverter ./cmd/goverter
+          dist/linux/goverter --version
+          dist/linux/goverter formats >/dev/null
+          dist/linux/goverter completion bash >/dev/null
+          cp README.md LICENSE THIRD_PARTY_NOTICES.md CHANGELOG.md dist/linux/
+          archive="Goverter-$version-linux-x64.tar.gz"
+          (cd dist/linux && tar -czf "../$archive" goverter README.md LICENSE THIRD_PARTY_NOTICES.md CHANGELOG.md)
+          (cd dist && sha256sum "$archive" >"$archive.sha256")
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: |
+            dist/Goverter-*-linux-x64.tar.gz
+            dist/Goverter-*-linux-x64.tar.gz.sha256
+
+  publish:
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
       - name: Publish GitHub release
-        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $installer = Get-ChildItem dist/installer/Goverter-*-windows-x64.exe -File
-          gh release create '${{ github.ref_name }}' `
-            $installer.FullName `
-            "$($installer.FullName).sha256" `
-            --verify-tag `
-            --generate-notes `
+          gh release create '${{ github.ref_name }}' dist/* \
+            --repo '${{ github.repository }}' \
+            --verify-tag \
+            --generate-notes \
             --title "Goverter ${{ github.ref_name }}"

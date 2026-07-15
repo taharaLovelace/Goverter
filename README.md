@@ -36,19 +36,35 @@ custom presets are not part of the first release.
 
 ## Installation
 
-Download the Windows x64 installer from the GitHub Releases page. The
-installer includes `ffmpeg.exe` and `ffprobe.exe` and adds Goverter to the
-current user's `PATH`.
+### Windows x64
 
-For development, install FFmpeg separately or point Goverter to a directory
-containing both executables:
+Download the Windows installer from GitHub Releases. It includes `ffmpeg.exe`
+and `ffprobe.exe` and adds Goverter to the current user's `PATH`.
+
+### Linux x86-64
+
+Install `ffmpeg` and `ffprobe` with your distribution, then download and
+extract `Goverter-<version>-linux-x64.tar.gz` from GitHub Releases:
+
+```bash
+tar -xzf Goverter-<version>-linux-x64.tar.gz
+./goverter --version
+sudo install -m 0755 goverter /usr/local/bin/goverter # optional
+```
+
+The available codecs depend on how the installed FFmpeg was compiled. Goverter
+searches `GOVERTER_FFMPEG_DIR` first, then a `tools` directory next to its own
+executable, and finally `PATH`.
+
+To use a separate FFmpeg installation:
 
 ```powershell
 $env:GOVERTER_FFMPEG_DIR = "C:\path\to\ffmpeg\bin"
 ```
 
-Goverter searches `GOVERTER_FFMPEG_DIR` first, then a `tools` directory next
-to its own executable, and finally `PATH`.
+```bash
+export GOVERTER_FFMPEG_DIR=/path/to/ffmpeg/bin
+```
 
 ## Usage
 
@@ -65,6 +81,8 @@ goverter pdf images .\scans --output scans.pdf --page-size a4 --margin small
 goverter pdf images .\photos --output photos.pdf --page-size fit --recursive
 goverter pdf merge cover.pdf content.pdf appendix.pdf --output book.pdf
 goverter completion powershell
+goverter completion bash
+goverter completion zsh
 ```
 
 Use `--overwrite` to replace existing results. For a single input, the
@@ -97,7 +115,7 @@ Run `goverter <command> --help` for every option.
 
 ## Development
 
-Go 1.26.4 or newer is required.
+Go 1.26.5 or newer is required.
 
 ```powershell
 go mod download

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	converter "github.com/taharaLovelace/Goverter/internal/convert"
@@ -78,6 +79,15 @@ func TestRealFFmpegConversions(t *testing.T) {
 			}
 			if info.Kind == media.KindUnknown {
 				t.Fatalf("output was not recognized: %#v", info)
+			}
+			if runtime.GOOS != "windows" {
+				stat, statErr := os.Stat(test.output)
+				if statErr != nil {
+					t.Fatal(statErr)
+				}
+				if stat.Mode().Perm()&0o400 == 0 {
+					t.Fatalf("output is not readable: mode=%v", stat.Mode().Perm())
+				}
 			}
 		})
 	}

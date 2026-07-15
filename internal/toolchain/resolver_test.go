@@ -4,14 +4,19 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
 func TestResolverPrefersEnvironmentDirectory(t *testing.T) {
 	t.Parallel()
 	directory := t.TempDir()
-	ffmpeg := filepath.Join(directory, "ffmpeg.exe")
-	ffprobe := filepath.Join(directory, "ffprobe.exe")
+	extension := ""
+	if runtime.GOOS == "windows" {
+		extension = ".exe"
+	}
+	ffmpeg := filepath.Join(directory, "ffmpeg"+extension)
+	ffprobe := filepath.Join(directory, "ffprobe"+extension)
 	os.WriteFile(ffmpeg, []byte(""), 0o644)
 	os.WriteFile(ffprobe, []byte(""), 0o644)
 

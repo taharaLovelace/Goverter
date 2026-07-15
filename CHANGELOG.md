@@ -4,6 +4,19 @@ All notable changes to Goverter are documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-15
+
+### Added
+
+- Linux x86-64 support with a release archive and SHA-256 checksum.
+- Windows and Linux CI coverage, including real FFmpeg integration tests on Linux.
+
+### Changed
+
+- Resolve `ffmpeg` and `ffprobe` using native executable names.
+- Compare paths with the host operating system's case-sensitivity rules.
+- Document Linux installation, FFmpeg requirements, and shell completions.
+
 ## [1.1.2] - 2026-07-13
 
 ### Fixed
@@ -56,3 +69,5 @@ All notable changes to Goverter are documented in this file.
 [1.1.1]: https://github.com/taharaLovelace/Goverter/compare/v1.1.0...v1.1.1
 
 [1.1.2]: https://github.com/taharaLovelace/Goverter/compare/v1.1.1...v1.1.2
+
+[1.2.0]: https://github.com/taharaLovelace/Goverter/compare/v1.1.2...v1.2.0

@@ -10,32 +10,36 @@ permissions:
 
 jobs:
   test:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
-
+      - name: Install FFmpeg
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Check formatting
-        shell: pwsh
-        run: |
-          $files = Get-ChildItem -Recurse -Filter '*.go' | ForEach-Object FullName
-          $unformatted = gofmt -l $files
-          if ($unformatted) {
-            Write-Error "The following files need gofmt:`n$($unformatted -join "`n")"
-          }
-
+        shell: bash
+        run: test -z "$(gofmt -l .)"
       - name: Vet
         run: go vet ./...
-
       - name: Verify modules
         run: go mod verify
-
       - name: Test
         run: go test ./...
-
       - name: Build
         run: go build ./cmd/goverter
+      - name: Run Linux integration tests
+        if: runner.os == 'Linux'
+        run: go test -tags integration ./integration
+      - name: Smoke-test Linux CLI
+        if: runner.os == 'Linux'
+        run: |
+          go run ./cmd/goverter --version
+          go run ./cmd/goverter formats
+          go run ./cmd/goverter completion bash >/dev/null

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/taharaLovelace/Goverter/internal/media"
@@ -105,5 +106,13 @@ func TestRecursiveCollectionExcludesOutputSubtree(t *testing.T) {
 	}
 	if len(files) != 1 || filepath.Base(files[0]) != "source.wav" {
 		t.Fatalf("collected files = %#v", files)
+	}
+}
+
+func TestSamePathUsesNativeCaseSensitivity(t *testing.T) {
+	got := samePath(filepath.Join("root", "converted"), filepath.Join("root", "Converted"))
+	want := runtime.GOOS == "windows"
+	if got != want {
+		t.Fatalf("samePath() = %t, want %t on %s", got, want, runtime.GOOS)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 )
 
 const envDirectory = "GOVERTER_FFMPEG_DIR"
@@ -24,37 +25,37 @@ func NewResolver() Resolver {
 }
 
 func (r Resolver) FFmpeg() (string, error) {
-	return r.find("ffmpeg.exe", "ffmpeg")
+	return r.find("ffmpeg")
 }
 
 func (r Resolver) FFprobe() (string, error) {
-	return r.find("ffprobe.exe", "ffprobe")
+	return r.find("ffprobe")
 }
 
-func (r Resolver) find(windowsName, pathName string) (string, error) {
+func (r Resolver) find(name string) (string, error) {
+	nativeName := name
+	if runtime.GOOS == "windows" {
+		nativeName += ".exe"
+	}
 	if directory := r.Getenv(envDirectory); directory != "" {
-		candidate := filepath.Join(directory, windowsName)
+		candidate := filepath.Join(directory, nativeName)
 		if isFile(candidate) {
 			return candidate, nil
 		}
-		return "", fmt.Errorf("%s is set, but %s was not found there", envDirectory, windowsName)
+		return "", fmt.Errorf("%s is set, but %s was not found there", envDirectory, nativeName)
 	}
 
 	if executable, err := r.ExecutablePath(); err == nil {
-		candidate := filepath.Join(filepath.Dir(executable), "tools", windowsName)
+		candidate := filepath.Join(filepath.Dir(executable), "tools", nativeName)
 		if isFile(candidate) {
 			return candidate, nil
 		}
 	}
 
-	if found, err := r.LookupPath(pathName); err == nil {
+	if found, err := r.LookupPath(name); err == nil {
 		return found, nil
 	}
-	if found, err := r.LookupPath(windowsName); err == nil {
-		return found, nil
-	}
-
-	return "", fmt.Errorf("%s was not found; reinstall Goverter or set %s", pathName, envDirectory)
+	return "", fmt.Errorf("%s was not found; reinstall Goverter or set %s", name, envDirectory)
 }
 
 func isFile(path string) bool {
